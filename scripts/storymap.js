@@ -1,6 +1,9 @@
 $(window).on('load', function() {
   var documentSettings = {};
 
+  // Some constants, such as default settings
+  const CHAPTER_ZOOM = 15;
+
   // This watches for the scrollable container
   var scrollPosition = 0;
   $('div#contents').scroll(function() {
@@ -108,23 +111,29 @@ $(window).on('load', function() {
 
     var markers = [];
     var pixelsAbove = [];
+    var chapterCount = 0;
 
     for (i in chapters) {
       var c = chapters[i];
-      // This creates numerical icons to match the ID numbers
-      // OR remove the next 6 lines for default blue Leaflet markers
-      var numericMarker = L.ExtraMarkers.icon({
-        icon: 'fa-number',
-        number: parseInt(i) + 1,
-        markerColor: 'blue'
-      });
 
-      var marker = L.marker(
-        [parseFloat(c['Latitude']), parseFloat(c['Longitude'])],
-        {icon: numericMarker}
-      );
+      if ( !isNaN(parseFloat(c['Latitude']))
+        && !isNaN(parseFloat(c['Longitude']))) {
+        var lat = parseFloat(c['Latitude']);
+        var lon = parseFloat(c['Longitude']);
 
-      markers.push(marker);
+        markers.push(
+          L.marker([lat, lon], {
+            icon: L.ExtraMarkers.icon({
+              icon: 'fa-number',
+              number: ++chapterCount,
+              markerColor: 'blue'
+            })
+          }
+        ));
+        
+      } else {
+        markers.push(null);
+      }
 
       var image = $('<img>', {
         src: c['Image Link'],
@@ -178,7 +187,11 @@ $(window).on('load', function() {
         if ($(this).scrollTop() >= pixelsAbove[i] && $(this).scrollTop() < (pixelsAbove[i+1] - 2 * chapterContainerMargin)) {
           $('.chapter-container').removeClass("in-focus").addClass("out-focus");
           $('div#container' + i).addClass("in-focus").removeClass("out-focus");
-          map.flyTo([chapters[i]['Latitude'], chapters[i]['Longitude']], chapters[i]['Zoom']);
+
+          if (chapters[i]['Latitude'] && chapters[i]['Longitude']) {
+            var zoom = chapters[i]['Zoom'] ? chapters[i]['Zoom'] : CHAPTER_ZOOM;
+            map.flyTo([chapters[i]['Latitude'], chapters[i]['Longitude']], zoom);
+          }
         }
       }
     });
@@ -219,14 +232,16 @@ $(window).on('load', function() {
 
     var bounds = [];
     for (i in markers) {
-      markers[i].addTo(map);
-      markers[i]['_pixelsAbove'] = pixelsAbove[i];
-      markers[i].on('click', function() {
-        var pixels = parseInt($(this)[0]['_pixelsAbove']) + 5;
-        $('div#contents').animate({
-          scrollTop: pixels + 'px'});
-      });
-      bounds.push(markers[i].getLatLng());
+      if (markers[i]) {
+        markers[i].addTo(map);
+        markers[i]['_pixelsAbove'] = pixelsAbove[i];
+        markers[i].on('click', function() {
+          var pixels = parseInt($(this)[0]['_pixelsAbove']) + 5;
+          $('div#contents').animate({
+            scrollTop: pixels + 'px'});
+        });
+        bounds.push(markers[i].getLatLng());
+      }
     }
     map.fitBounds(bounds);
 
