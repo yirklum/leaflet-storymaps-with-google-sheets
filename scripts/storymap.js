@@ -113,11 +113,13 @@ $(window).on('load', function() {
     var pixelsAbove = [];
     var chapterCount = 0;
 
+    var currentlyInFocus; // integer to specify each chapter is currently in focus
+    var overlay;  // URL of the overlay for in-focus chapter
+
     for (i in chapters) {
       var c = chapters[i];
 
-      if ( !isNaN(parseFloat(c['Latitude']))
-        && !isNaN(parseFloat(c['Longitude']))) {
+      if ( !isNaN(parseFloat(c['Latitude'])) && !isNaN(parseFloat(c['Longitude']))) {
         var lat = parseFloat(c['Latitude']);
         var lon = parseFloat(c['Longitude']);
 
@@ -130,7 +132,7 @@ $(window).on('load', function() {
             })
           }
         ));
-        
+
       } else {
         markers.push(null);
       }
@@ -175,7 +177,7 @@ $(window).on('load', function() {
       });
     }
 
-    // Calculate heights
+    // For each block (chapter), calculate how many pixels above it
     pixelsAbove[0] = -100;
     for (i = 1; i < chapters.length; i++) {
       pixelsAbove[i] = pixelsAbove[i-1] + $('div#container' + (i-1)).height() + chapterContainerMargin;
@@ -183,18 +185,40 @@ $(window).on('load', function() {
     pixelsAbove.push(Number.MAX_VALUE);
 
     $('div#contents').scroll(function() {
+      var currentPosition = $(this).scrollTop();
       for (i = 0; i < pixelsAbove.length - 1; i++) {
-        if ($(this).scrollTop() >= pixelsAbove[i] && $(this).scrollTop() < (pixelsAbove[i+1] - 2 * chapterContainerMargin)) {
+        if (currentPosition >= pixelsAbove[i] && currentPosition < (pixelsAbove[i+1] - 2 * chapterContainerMargin) && currentlyInFocus != i) {
+          // Remove styling for the old in-focus chapter and
+          // add it to the new active chapter
           $('.chapter-container').removeClass("in-focus").addClass("out-focus");
           $('div#container' + i).addClass("in-focus").removeClass("out-focus");
 
+          currentlyInFocus = i;
+
+          // Remove overlay tile layer if needed
+          if (map.hasLayer(overlay)) {
+            map.removeLayer(overlay);
+          }
+
+          // Add chapter's overlay tiles if specified in options
+          if (chapters[i]['Overlay'] != '') {
+            var opacity = (chapters[i]['Overlay Transparency'] != '') ? parseFloat(chapters[i]['Overlay Transparency']) : 1;
+            overlay = L.tileLayer(chapters[i]['Overlay'], {opacity: opacity});
+            overlay.addTo(map);
+          }
+
+          // Fly to the new marker destination if latitude and longitude exist
           if (chapters[i]['Latitude'] && chapters[i]['Longitude']) {
             var zoom = chapters[i]['Zoom'] ? chapters[i]['Zoom'] : CHAPTER_ZOOM;
             map.flyTo([chapters[i]['Latitude'], chapters[i]['Longitude']], zoom);
           }
+
+          // No need to iterate through the following chapters
+          break;
         }
       }
     });
+
 
     $('#contents').append(" \
       <div id='space-at-the-bottom'> \
@@ -249,7 +273,6 @@ $(window).on('load', function() {
     $('div.loader').css('visibility', 'hidden');
 
     $('div#container0').addClass("in-focus");
-
     $('div#contents').animate({scrollTop: '1px'});
   }
 
