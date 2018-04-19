@@ -1,5 +1,5 @@
 # leaflet-storymaps-with-google-sheets
-Customize your Leaflet story map with linked Google Sheets template and scrolling narrative
+Customize your Leaflet story map with linked Google Sheets template and scrolling narrative; now supports overlay
 
 ## Live links (replace with your own)
 - Map http://datavizforall.github.io/leaflet-storymaps-with-google-sheets/index.html
@@ -14,8 +14,8 @@ Customize your Leaflet story map with linked Google Sheets template and scrollin
 Developed by [Ilya Ilyankou](https://github.com/ilyankou) and [Jack Dougherty](https://github.com/jackdougherty) with support from Trinity College CT, using a [Google Sheets](https://www.google.com/sheets/about/) template, with these open-source components:
 - Inspired by: Code for Atlanta mapsfor.us (2016) https://github.com/codeforatlanta/mapsforus (BSD-3-Clause)
 - Adapted from MUX Lab, Map Effects 100: https://github.com/muxlab/map-effects-100, see http://muxlab.github.io/map-effects-100/Leaflet/11_scroll-driven-map-navigation.html
-- Leaflet v1.0.3 https://leafletjs.com (BSD-2-Clause)
-- jQuery v3.2.0 https://code.jquery.com (MIT)
+- Leaflet v1.3.1 https://leafletjs.com (BSD-2-Clause)
+- jQuery v3.3.1 https://code.jquery.com (MIT)
 - leaflet-providers (v1.1.15, manually updated for Carto https) https://github.com/leaflet-extras/leaflet-providers (BSD-2-Clause)
 - Mapzen Search geocoding plugin (v1.8.1, customized to display a blue circle around the search result) https://github.com/mapzen/leaflet-geocoder (MIT)
 - leaflet-locatecontrol (v0.60.0) https://github.com/domoritz/leaflet-locatecontrol (MIT)
